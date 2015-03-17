@@ -28,8 +28,11 @@ io.on('connection', function(socket){
     // console.log("cookies", socket.request.headers.cookie);
 
     socket.on('newmessage', function(msg) {
-        console.log("New chat message", msg);
         io.sockets.emit("newmessage", msg);
+    });
+
+    socket.on('clicked', function(msg) {
+        io.sockets.emit("clicked", msg);
     });
 
 });

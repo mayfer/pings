@@ -16,6 +16,25 @@
                 height: 20px;
                 border-radius: 50%;
             }
+
+            #map {
+                position: relative;
+            }
+            .dot {
+                background: #f00;
+                border-radius: 50%;
+                width: 20px;
+                height: 20px;
+                opacity: 1;
+                transition: all 0.5s linear;
+            }
+
+            .dot.fade {
+                opacity: 0;
+                width: 40px;
+                height: 40px;
+                margin: -10px 0 0 -10px;
+            }
             
         </style>
         <script src="/socket.io/socket.io.js"></script>
@@ -25,10 +44,19 @@
             $(document).ready(function(){
 
                 var socket = io();
-                
+
                 socket.on("newmessage", function(message) {
-                    console.log('newmsg');
                     $('body').append(message).append("<br />");
+                });
+                socket.on("clicked", function(message) {
+                    console.log('clicked', message);
+                    var dot = $('<div>').addClass('dot').css({
+                        position: 'absolute',
+                        top: message.y - 10,
+                        left: message.x - 10,
+                    }).appendTo($('body'));
+                    setTimeout(function() { dot.addClass('fade') }, 100);
+                    setTimeout(function() { dot.remove() }, 600);
                 });
 
                 $('form').submit(function(e){
@@ -37,6 +65,14 @@
                     
                     socket.emit("newmessage", msg.val());
                     msg.val('');
+                });
+
+                $('#map').click(function (e) { //Offset mouse Position
+                    var posX = e.pageX;
+                        posY = e.pageY;
+
+                    socket.emit("clicked", {x: posX, y: posY});
+                    console.log(posX, posY);
                 });
             });
                 
@@ -47,6 +83,10 @@
             <input type='text' name='message' />
             <input type='submit' name='asd' value='Send' />
         </form>
+
+        <div id="map">
+            <img src="http://upload.wikimedia.org/wikipedia/commons/d/d0/BlankMap-World-1ce.png" style="width: 100%;" />
+        </div>
 
 
     </body>
